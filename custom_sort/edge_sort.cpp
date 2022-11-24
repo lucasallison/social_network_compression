@@ -20,7 +20,7 @@ Edge_Sort::~Edge_Sort()
     }
 }
 
-bool Edge_Sort::read_edge_list(const std::string& edge_list)
+bool Edge_Sort::read_edge_list(const std::string &edge_list)
 {
 
     std::vector<std::vector<std::string>> content;
@@ -59,26 +59,18 @@ bool Edge_Sort::read_edge_list(const std::string& edge_list)
         return false;
     }
 
-    for (int i = 0; i < int(content.size()); i++)
-    {
-        for (int j = 0; j < int(content[i].size()); j++)
-        {
-            std::cout << content[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
-
     _node_count = node_ind;
 
     // Allocate the adjacency list
-    _adjacency_mat = new int*[_node_count];
-    for(int i = 0; i < _node_count; i++)
+    _adjacency_mat = new int *[_node_count];
+    for (int i = 0; i < _node_count; i++)
         _adjacency_mat[i] = new int[_node_count];
 
-
     // Set all entries to 0
-    for (int i = 0; i < _node_count; i++) {
-        for (int j = 0; j < _node_count; j++) {
+    for (int i = 0; i < _node_count; i++)
+    {
+        for (int j = 0; j < _node_count; j++)
+        {
             _adjacency_mat[i][j] = 0;
         }
     }
@@ -92,11 +84,35 @@ bool Edge_Sort::read_edge_list(const std::string& edge_list)
         source = node_identifier_to_index[content[i][source_node_index]];
         target = node_identifier_to_index[content[i][target_node_index]];
         _adjacency_mat[source][target] = 1;
+
+        if (_node_identifier.count(source) == 0)
+            _node_identifier.insert({source, content[i][source_node_index]});
+
+        if (_node_identifier.count(target) == 0)
+            _node_identifier.insert({target, content[i][target_node_index]});
     }
 
-    for (int i = 0; i < _node_count; i++) {
-        for (int j = 0; j< _node_count; j++) {
+    std::map<int, std::string>::iterator it;
+
+
+    // TODO DELETE
+    for (it = _node_identifier.begin(); it != _node_identifier.end(); it++)
+        std::cout << it->first << ' ' << it->second << std::endl;
+
+    for (int i = 0; i < _node_count; i++)
+    {
+        for (int j = 0; j < _node_count; j++)
+        {
             std::cout << _adjacency_mat[i][j] << " ";
+        }
+        std::cout << "\n";
+    }
+
+    for (int i = 0; i < int(content.size()); i++)
+    {
+        for (int j = 0; j < int(content[i].size()); j++)
+        {
+            std::cout << content[i][j] << " ";
         }
         std::cout << "\n";
     }
