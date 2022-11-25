@@ -18,9 +18,8 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	std::string sort_choice(argv[1]);
-
-	Edge_Sort *edge_sorter;
+	const std::string sort_choice(argv[1]);
+	Edge_Sort *edge_sorter = nullptr;
 
 	if (sort_choice.compare(SIM_SORT_ARG) == 0)
 	{
@@ -29,6 +28,7 @@ int main(int argc, char **argv)
 	else
 	{
 		std::cerr << sort_choice << " sorting has not been implemented." << std::endl;
+		// TODO fix this with error handling
 		return -1;
 	}
 
@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	//	edge_sorter->sort();
+	edge_sorter->sort();
 
 	delete edge_sorter;
 

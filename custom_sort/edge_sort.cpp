@@ -96,7 +96,6 @@ bool Edge_Sort::read_edge_list(const std::string &edge_list)
 
     std::map<int, std::string>::iterator it;
 
-
     // TODO DELETE
     for (it = _node_identifier.begin(); it != _node_identifier.end(); it++)
         std::cout << it->first << ' ' << it->second << std::endl;
@@ -120,4 +119,9 @@ bool Edge_Sort::read_edge_list(const std::string &edge_list)
     }
 
     return true;
+}
+
+void Edge_Sort::sort()
+{
+    std::cerr << "Call a child class to sort" << std::endl;
 }
