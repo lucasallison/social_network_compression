@@ -13,4 +13,6 @@ Sorts the nodes based on similarity ... reference paper
 
 ## TODO's
 
-Currently the edge list is saved by the program as an adjacency matrix
+- Currently the edge list is saved by the program as an adjacency matrix, a sparse representation should be implemented.
+- Smaller TODO's are indicated by comments n the code
+

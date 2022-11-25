@@ -1,8 +1,9 @@
+#ifndef __EDGE_SORT_H__
+#define __EDGE_SORT_H__
+
 #include <string>
 #include <map>
 
-#ifndef __EDGE_SORT_H__
-#define __EDGE_SORT_H__
 
 class Edge_Sort
 {

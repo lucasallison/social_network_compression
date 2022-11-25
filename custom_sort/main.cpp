@@ -1,24 +1,47 @@
-#include<iostream>
-#include<string>
+#include <iostream>
+#include <string>
 
 #include "edge_sort.h"
+#include "similarity_sort/sim_sort.h"
 
-int main(int argc, char** argv) {
+const std::string SIM_SORT_ARG = "similarity";
 
-	if (argc != 2) {
-		std::cerr << "One argument expected for the file loction but " 
-		<< argc -1 << " where given" << std::endl; 
+int main(int argc, char **argv)
+{
+
+	// TODO help menu
+
+	if (argc != 3)
+	{
+		std::cerr << "Three argument expected but "
+				  << argc - 1 << " where given." << std::endl;
 		return -1;
 	}
 
-	Edge_Sort edge_sort = Edge_Sort();
+	std::string sort_choice(argv[1]);
 
-	std::string edge_list(argv[1]);
-	if (! edge_sort.read_edge_list(edge_list) ) {
+	Edge_Sort *edge_sorter;
+
+	if (sort_choice.compare(SIM_SORT_ARG) == 0)
+	{
+		edge_sorter = new Sim_Sort();
+	}
+	else
+	{
+		std::cerr << sort_choice << " sorting has not been implemented." << std::endl;
+		return -1;
+	}
+
+	std::string edge_list(argv[2]);
+	if (!edge_sorter->read_edge_list(edge_list))
+	{
 		std::cerr << "Failed to read edge list" << std::endl;
 		return -1;
 	}
 
+	//	edge_sorter->sort();
+
+	delete edge_sorter;
+
 	return 0;
 }
-

@@ -1,5 +1,7 @@
 #include "edge_sort.h"
 
+#include <string>
+#include <map>
 #include <iostream>
 #include <fstream>
 #include <vector>
