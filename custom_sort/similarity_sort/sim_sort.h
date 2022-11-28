@@ -8,7 +8,7 @@ class Sim_Sort : public Edge_Sort
 
 public:
     Sim_Sort();
-    void sort();
+    bool sort(const std::string &sorted_list_dest);
 };
 
 #endif /* __SIM_SORT_H__ */

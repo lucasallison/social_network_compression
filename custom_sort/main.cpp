@@ -4,17 +4,17 @@
 #include "edge_sort.h"
 #include "similarity_sort/sim_sort.h"
 
-const std::string SIM_SORT_ARG = "similarity";
+const std::string SIM_SORT_ARG = "sim";
 
 int main(int argc, char **argv)
 {
 
-	// TODO help menu
-
-	if (argc != 3)
+	if (argc != 4)
 	{
-		std::cerr << "Three argument expected but "
-				  << argc - 1 << " where given." << std::endl;
+		std::cerr << "Three arguments expected but "
+				  << argc - 1 << " where given. Program should be called as follows: " << std::endl;
+			
+		std::cerr << "main sort_algorithm src_file dst_file" << std::endl;
 		return -1;
 	}
 
@@ -28,7 +28,6 @@ int main(int argc, char **argv)
 	else
 	{
 		std::cerr << sort_choice << " sorting has not been implemented." << std::endl;
-		// TODO fix this with error handling
 		return -1;
 	}
 
@@ -39,7 +38,8 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	edge_sorter->sort();
+	std::string dest_file(argv[3]);
+	edge_sorter->sort(dest_file);
 
 	delete edge_sorter;
 

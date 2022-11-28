@@ -6,12 +6,13 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <list>
+#include <algorithm>
 
 Edge_Sort::Edge_Sort() {}
 
 Edge_Sort::~Edge_Sort()
 {
-
     if (_adjacency_mat != nullptr)
     {
         for (int i = 0; i < _node_count; i++)
@@ -22,9 +23,9 @@ Edge_Sort::~Edge_Sort()
     }
 }
 
+// TODO clean up this function a bit
 bool Edge_Sort::read_edge_list(const std::string &edge_list)
 {
-
     std::vector<std::vector<std::string>> content;
     std::vector<std::string> row;
     std::string line, node;
@@ -41,7 +42,7 @@ bool Edge_Sort::read_edge_list(const std::string &edge_list)
 
             std::stringstream str(line);
 
-            // TODO add support for more
+            // TODO add support for more formats
             while (std::getline(str, node, ' '))
             {
                 row.push_back(node);
@@ -94,34 +95,68 @@ bool Edge_Sort::read_edge_list(const std::string &edge_list)
             _node_identifier.insert({target, content[i][target_node_index]});
     }
 
-    std::map<int, std::string>::iterator it;
-
-    // TODO DELETE
-    for (it = _node_identifier.begin(); it != _node_identifier.end(); it++)
-        std::cout << it->first << ' ' << it->second << std::endl;
-
-    for (int i = 0; i < _node_count; i++)
-    {
-        for (int j = 0; j < _node_count; j++)
-        {
-            std::cout << _adjacency_mat[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
-
-    for (int i = 0; i < int(content.size()); i++)
-    {
-        for (int j = 0; j < int(content[i].size()); j++)
-        {
-            std::cout << content[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
-
     return true;
 }
 
-void Edge_Sort::sort()
+int Edge_Sort::compare_nodes(const int i, const int j, int *degree_i, int *degree_j)
+{
+    if (_adjacency_mat == nullptr)
+        return -1;
+
+    *degree_i = 0;
+    *degree_j = 0;
+
+    int overlapping_successors = 0;
+    for (int e = 0; e < _node_count; e++)
+    {
+        *degree_i += _adjacency_mat[i][e];
+        *degree_j += _adjacency_mat[j][e];
+
+        if (_adjacency_mat[i][e] == 1 && _adjacency_mat[j][e] == 1)
+            overlapping_successors++;
+    }
+
+    return overlapping_successors;
+}
+
+bool Edge_Sort::write_sorted_nodes_to_file(std::list<int> &order, const std::string &sorted_list_dest)
+{
+    std::ofstream file(sorted_list_dest);
+
+    std::vector<int> order_mapping(_node_count);
+    int index = 0;
+    for (auto const &node : order)
+    {
+        order_mapping[node] = index;
+        index++;
+    }
+
+    for (auto const &node : order)
+    {
+
+        std::vector<int> successors;
+
+        for (int j = 0; j < _node_count; j++)
+        {
+            if (_adjacency_mat[node][j] == 1)
+                successors.push_back(j);
+        }
+
+        std::sort(successors.begin(), successors.end(), [order_mapping](const int &i, const int &j)
+                  { return order_mapping[i] < order_mapping[j]; });
+
+        file << _node_identifier[node] << ": ";
+        for(auto const &n : successors)
+                file << _node_identifier[n] << " ";
+        file << std::endl;
+    }
+
+    file.close();
+    return true;
+}
+
+bool Edge_Sort::sort(const std::string &sorted_list_dest)
 {
     std::cerr << "Call a child class to sort" << std::endl;
+    return true;
 }

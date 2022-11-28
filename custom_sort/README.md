@@ -1,6 +1,6 @@
 # Custom Sorting Algorithms
 
-This subdirectory contains algorithms which order edge lists based on custom sorting algorithm, which can in turn be used by the webgraph framework to compress them.
+This subdirectory contains algorithms which order edge lists based on custom sorting algorithm, which can in turn be used by the webgraph framework to compress them. The program expects an edge list as an input and ouputs a graph in the AsciiGraph file format, as expected by the webgraph framework. It takes an edge list as input because this is commonly used by widely available datasets.
 
 ## Edge Sort Base Class
 
