@@ -8,6 +8,7 @@ Sim_Sort::Sim_Sort() {}
 bool Sim_Sort::sort(const std::string &sorted_list_dest)
 {
 
+    std::cerr << "Performing similarity sort" << std::endl;
     std::list<int> order = {};
 
     for (int node = 0; node < _node_count; node++)
@@ -32,6 +33,11 @@ bool Sim_Sort::sort(const std::string &sorted_list_dest)
             }
         }
         order.insert(insert_pos, node);
+
+        if (node % 1000 == 0)
+        {
+            std::cout << "Processed " << node << " of " << _node_count << " nodes" << std::endl;
+        }
     }
 
     return write_sorted_nodes_to_file(order, sorted_list_dest);
