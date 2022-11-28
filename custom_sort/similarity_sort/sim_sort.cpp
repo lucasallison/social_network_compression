@@ -13,7 +13,6 @@ bool Sim_Sort::sort(const std::string &sorted_list_dest)
 
     for (int node = 0; node < _node_count; node++)
     {
-
         std::list<int>::iterator insert_pos = order.begin();
         int max_num_comm_successors = 1;
 
@@ -26,7 +25,7 @@ bool Sim_Sort::sort(const std::string &sorted_list_dest)
             if (num_comm_successors >= max_num_comm_successors)
             {
                 insert_pos = it;
-                if (degree_node <= degree_sorted_node)
+                if (degree_node <= degree_sorted_node) 
                     insert_pos++;
 
                 max_num_comm_successors = num_comm_successors;

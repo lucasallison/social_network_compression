@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 	}
 
 	std::string edge_list(argv[2]);
-	if (!edge_sorter->read_edge_list(edge_list, true))
+	if (!edge_sorter->read_edge_list(edge_list))
 	{
 		std::cerr << "Failed to read edge list" << std::endl;
 		return -1;

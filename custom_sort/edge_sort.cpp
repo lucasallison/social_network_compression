@@ -13,36 +13,27 @@ Edge_Sort::Edge_Sort() {}
 
 Edge_Sort::~Edge_Sort()
 {
-    free_adjacency_mat();
-}
+    /*
+    if (_col_ind != nullptr)
+        delete[] _col_ind;
 
-void Edge_Sort::free_adjacency_mat()
-{
-    if (_adjacency_mat != nullptr)
-    {
-        for (int i = 0; i < _node_count; i++)
-        {
-            delete[] _adjacency_mat[i];
-        }
-        delete[] _adjacency_mat;
-    }
-}
+    if (_row_ptr_begin != nullptr)
+        delete[] _row_ptr_begin;
 
-void Edge_Sort::free_sparse_mat()
-{
-    if (_s_mat != nullptr)
-    {
-        delete _s_mat;
-    }
+    if (_row_ptr_end != nullptr)
+        delete[] _row_ptr_end;
+*/
 }
 
 // TODO clean up this function a bit
-bool Edge_Sort::read_edge_list(const std::string &edge_list, bool sparse_matrix)
+bool Edge_Sort::read_edge_list(const std::string &edge_list)
 {
     std::cout << "Read in " << edge_list << std::endl;
     std::vector<std::vector<std::string>> content;
     std::vector<std::string> row;
     std::string line, node;
+    const int src_ind = 0;
+    const int tar_ind = 1;
 
     std::map<std::string, int> node_identifier_to_index;
     int node_ind = 0;
@@ -56,18 +47,22 @@ bool Edge_Sort::read_edge_list(const std::string &edge_list, bool sparse_matrix)
 
             std::stringstream str(line);
 
-            // TODO add support for more formats
+            // TODO add support for more formats, maybe as cmd line arg?
             while (std::getline(str, node, ' '))
-            {
                 row.push_back(node);
 
-                if (node_identifier_to_index.count(node) == 0)
-                {
-                    node_identifier_to_index.insert({node, node_ind});
-                    node_ind++;
-                }
+            // Only add valid lines of the file
+            if (row.size() == 2)
+            {
+                content.push_back(row);
+
+                for (const auto &n : row)
+                    if (node_identifier_to_index.count(n) == 0)
+                    {
+                        node_identifier_to_index.insert({n, node_ind});
+                        node_ind++;
+                    }
             }
-            content.push_back(row);
         }
     }
     else
@@ -78,134 +73,88 @@ bool Edge_Sort::read_edge_list(const std::string &edge_list, bool sparse_matrix)
 
     _node_count = node_ind;
 
-    // Allocate the adjacency list
-    _adjacency_mat = new int *[_node_count];
-    for (int i = 0; i < _node_count; i++)
-        _adjacency_mat[i] = new int[_node_count];
-
-    // Set all entries to 0
-    for (int i = 0; i < _node_count; i++)
+    /* SORT NODE: PUT IN FUNCTION */
+    struct
     {
-        for (int j = 0; j < _node_count; j++)
+        std::map<std::string, int> *mptr;
+        bool operator()(const std::vector<std::string> &i, const std::vector<std::string> &j)
         {
-            _adjacency_mat[i][j] = 0;
+            int i_src = (*mptr)[i[src_ind]];
+            int i_tar = (*mptr)[i[tar_ind]];
+            int j_src = (*mptr)[j[src_ind]];
+            int j_tar = (*mptr)[j[tar_ind]];
+
+            if (i_src == j_src)
+                return i_tar < j_tar;
+
+            return i_src < j_src;
         }
-    }
+    } edge_comp;
 
-    int source_node_index = 0, target_node_index = 1;
+    edge_comp.mptr = &node_identifier_to_index;
 
-    // Set existing edges to 1
-    for (int i = 0; i < int(content.size()); i++)
+    std::sort(content.begin(), content.end(), edge_comp);
+
+    std::cout << "File parsed: saving to memory" << std::endl;
+
+    // Allocate arrys
+    _col_ind = new int[content.size()];
+    _row_ptr_begin = new int[_node_count];
+    _row_ptr_end = new int[_node_count];
+
+    int index = 0;
+    for (int n = 0; n < _node_count; n++)
     {
-        if (content[i].size() != 2)
+        _row_ptr_begin[n] = index;
+
+        while (index < int(content.size()) && node_identifier_to_index[content[index][src_ind]] == n)
         {
-            std::cerr << "Line " << i << " does not contain exactly one source and one target node" << std::endl;
-            continue;
+
+            int source = n;
+            int target = node_identifier_to_index[content[index][tar_ind]];
+
+            _col_ind[index] = target;
+
+            if (_node_identifier.count(source) == 0)
+                _node_identifier.insert({source, content[index][src_ind]});
+
+            if (_node_identifier.count(target) == 0)
+                _node_identifier.insert({target, content[index][tar_ind]});
+
+            index++;
         }
-
-        int source, target;
-        source = node_identifier_to_index[content[i][source_node_index]];
-        target = node_identifier_to_index[content[i][target_node_index]];
-        _adjacency_mat[source][target] = 1;
-
-        if (_node_identifier.count(source) == 0)
-            _node_identifier.insert({source, content[i][source_node_index]});
-
-        if (_node_identifier.count(target) == 0)
-            _node_identifier.insert({target, content[i][target_node_index]});
+        _row_ptr_end[n] = index;
     }
 
     std::cout << "Edge list has successfully been read" << std::endl;
-
-    if (sparse_matrix)
-    {
-        convert_adj_mat_to_s_mat();
-    }
-
     return true;
-}
-
-void Edge_Sort::convert_adj_mat_to_s_mat()
-{
-    _s_mat = new Sparse_Matrix;
-
-    int nnz = 0;
-    for (int i = 0; i < _node_count; i++)
-    {
-        _s_mat->row_ptr_begin[i] = nnz;
-        for (int j = 0; j < _node_count; j++)
-        {
-            if (_adjacency_mat[i][j] == 1)
-            {
-                _s_mat->col_ind[nnz] = j;
-                nnz++;
-            }
-        }
-        _s_mat->row_ptr_end[i] = nnz;
-        nnz++;
-    }
-
-    _is_sparse = true;
 }
 
 int Edge_Sort::compare_nodes(const int i, const int j, int *degree_i, int *degree_j)
 {
-    *degree_i = 0;
-    *degree_j = 0;
+    // TODO check i and j ?
+
+    *degree_i = _row_ptr_end[i] - _row_ptr_begin[i];
+    *degree_j = _row_ptr_end[j] - _row_ptr_begin[j];
 
     int overlapping_successors = 0;
+    int j_ind = _row_ptr_begin[j];
+    int i_ind = _row_ptr_begin[i];
 
-
-    // TODO check i and j
-    // TODO put this in seperate functions
-    if (_is_sparse)
+    while (true)
     {
-        if (_s_mat == nullptr)
-            return -1;
+        if (j_ind >= _row_ptr_end[j] || i_ind >= _row_ptr_end[i])
+            break;
 
-        *degree_i = 0;
-        *degree_j = 0;
-
-        int j_ind = _s_mat->row_ptr_end[j];
-        int i_ind = _s_mat->row_ptr_begin[i];
-
-        while (true)
+        if (_col_ind[i_ind] == _col_ind[j_ind])
         {
-            if (j_ind >= _s_mat->row_ptr_end[j] || i_ind >= _s_mat->row_ptr_end[i])
-                break;
-            
-            if (_s_mat->col_ind[i_ind] == _s_mat->col_ind[j_ind]) {
-                overlapping_successors++;
-                i_ind++;
-                *degree_i += 1;
-            } else if (_s_mat->col_ind[i_ind] < _s_mat->col_ind[j_ind]) {
-                i_ind++;
-                *degree_i += 1;
-            } else {
-                j_ind++;
-                *degree_j += 1;
-            }
-        }
-
-        for(; i_ind < _s_mat->row_ptr_end[i]; i_ind++)
-            *degree_i += 1;
-
-        for(; j_ind < _s_mat->row_ptr_end[j]; j_ind++)
-            *degree_j += 1;
-
-        return overlapping_successors;
-    }
-
-    if (_adjacency_mat == nullptr)
-        return -1;
-
-    for (int e = 0; e < _node_count; e++)
-    {
-        *degree_i += _adjacency_mat[i][e];
-        *degree_j += _adjacency_mat[j][e];
-
-        if (_adjacency_mat[i][e] == 1 && _adjacency_mat[j][e] == 1)
             overlapping_successors++;
+            i_ind++;
+        }
+        else if (_col_ind[i_ind] < _col_ind[j_ind])
+            i_ind++;
+        else
+            j_ind++;
     }
 
     return overlapping_successors;
@@ -229,11 +178,8 @@ bool Edge_Sort::write_sorted_nodes_to_file(std::list<int> &order, const std::str
 
         std::vector<int> successors;
 
-        for (int j = 0; j < _node_count; j++)
-        {
-            if (_adjacency_mat[node][j] == 1)
-                successors.push_back(j);
-        }
+        for (int i = _row_ptr_begin[node]; i < _row_ptr_end[node]; i++)
+            successors.push_back(_col_ind[i]);
 
         std::sort(successors.begin(), successors.end(), [order_mapping](const int &i, const int &j)
                   { return order_mapping[i] < order_mapping[j]; });
